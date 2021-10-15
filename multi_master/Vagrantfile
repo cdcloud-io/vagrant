@@ -20,6 +20,10 @@
 # 2. Import gpg keys as part of scripts.
 # 3. Port forwards all rem'd out due to conflict.  can only forward on one guest.
 # 4. Add shared disk for clusters.
+# 5. Fix bash profile for remote terminal functionality - run command from terminal manually
+#
+#   eval `ssh-agent -s`
+#   ssh-add
 #
 #
 
