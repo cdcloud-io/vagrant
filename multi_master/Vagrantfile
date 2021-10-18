@@ -45,28 +45,28 @@ MASTER_SERVER_NAME = "master"
 MASTER_SERVER_ADDDISKSIZE = "2GB"
 
 # LOAD BALANCER Server Definitions - 0 by default for no deployment
-LB_SERVER_COUNT = 2
+LB_SERVER_COUNT = 0
 LB_SERVER_CPU = 1
 LB_SERVER_MEMORY = 1024
 LB_SERVER_OS = CENTOS7
 LB_SERVER_NAME = "lb" # This name will be suffixed with a count number
 
 # WEB Server Definitions - 0 by default for no deployment
-WEB_SERVER_COUNT = 2
+WEB_SERVER_COUNT = 0
 WEB_SERVER_CPU = 1
 WEB_SERVER_MEMORY = 512
 WEB_SERVER_OS = CENTOS7
 WEB_SERVER_NAME = "web" # This name will be suffixed with a count number
 
 # APP Server Definitions - 0 by default for no deployment
-APP_SERVER_COUNT = 2
+APP_SERVER_COUNT = 0
 APP_SERVER_CPU = 1
 APP_SERVER_MEMORY = 1024
 APP_SERVER_OS = CENTOS7
 APP_SERVER_NAME = "app" # This name will be suffixed with a count number
 
 # DATABASE Server Definitions - 0 by default for no deployment
-DB_SERVER_COUNT = 2
+DB_SERVER_COUNT = 0
 DB_SERVER_CPU = 1
 DB_SERVER_MEMORY = 1024
 DB_SERVER_OS = CENTOS7
