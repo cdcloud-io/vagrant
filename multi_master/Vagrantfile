@@ -45,28 +45,28 @@ MASTER_SERVER_NAME = "master"
 MASTER_SERVER_ADDDISKSIZE = "2GB"
 
 # LOAD BALANCER Server Definitions - 0 by default for no deployment
-LB_SERVER_COUNT = 0
+LB_SERVER_COUNT = 1
 LB_SERVER_CPU = 1
 LB_SERVER_MEMORY = 1024
 LB_SERVER_OS = CENTOS7
 LB_SERVER_NAME = "lb" # This name will be suffixed with a count number
 
 # WEB Server Definitions - 0 by default for no deployment
-WEB_SERVER_COUNT = 0
+WEB_SERVER_COUNT = 1
 WEB_SERVER_CPU = 1
 WEB_SERVER_MEMORY = 512
 WEB_SERVER_OS = CENTOS7
 WEB_SERVER_NAME = "web" # This name will be suffixed with a count number
 
 # APP Server Definitions - 0 by default for no deployment
-APP_SERVER_COUNT = 0
+APP_SERVER_COUNT = 1
 APP_SERVER_CPU = 1
 APP_SERVER_MEMORY = 1024
 APP_SERVER_OS = CENTOS7
 APP_SERVER_NAME = "app" # This name will be suffixed with a count number
 
 # DATABASE Server Definitions - 0 by default for no deployment
-DB_SERVER_COUNT = 0
+DB_SERVER_COUNT = 1
 DB_SERVER_CPU = 1
 DB_SERVER_MEMORY = 1024
 DB_SERVER_OS = CENTOS7
@@ -98,102 +98,103 @@ SCRIPT
 Vagrant.configure("2") do |config|
   config.hostmanager.enabled = true
   config.ssh.forward_agent = true
+
   # Install POSTS SCRIPTS on ALL Machines 
-  config.vm.provision "shell", inline: $POST_SCRIPT_YUM
+  # config.vm.provision "shell", inline: $POST_SCRIPT_YUM
 
 
-  config.vm.define MASTER_SERVER_NAME + "1", primary: true do |subconfig|
-    subconfig.vm.box = CENTOS7
-    subconfig.vm.hostname = MASTER_SERVER_NAME + "1"
-    subconfig.vm.network :private_network, ip: MASTERIP
-    subconfig.vm.disk :disk, size: MASTER_SERVER_ADDDISKSIZE, name: "storage"
-    subconfig.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
-    subconfig.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
-    subconfig.vm.provision "file", source: "./config", destination: "/home/vagrant/.ssh/config"
-    subconfig.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
-    subconfig.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
-    subconfig.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
-    subconfig.vm.provision "shell", inline: "eval $(ssh-agent)"
-    subconfig.vm.provision "shell", inline: "ssh-add /home/vagrant/.ssh/id_rsa_vagrant"
-    subconfig.vm.provider "virtualbox" do |master|
-      master.cpus = MASTER_SERVER_CPU
-      master.memory = MASTER_SERVER_MEMORY
+  config.vm.define MASTER_SERVER_NAME + "1", primary: true do |master|
+    master.vm.box = CENTOS7
+    master.vm.hostname = MASTER_SERVER_NAME + "1"
+    master.vm.network :private_network, ip: MASTERIP
+    master.vm.disk :disk, size: MASTER_SERVER_ADDDISKSIZE, name: "storage"
+    master.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
+    master.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
+    master.vm.provision "file", source: "./config", destination: "/home/vagrant/.ssh/config"
+    master.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
+    master.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
+    master.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
+    master.vm.provision "shell", inline: "eval $(ssh-agent)"
+    master.vm.provision "shell", inline: "ssh-add /home/vagrant/.ssh/id_rsa_vagrant"
+    master.vm.provider "virtualbox" do |virtualbox|
+      virtualbox.cpus = MASTER_SERVER_CPU
+      virtualbox.memory = MASTER_SERVER_MEMORY
     end
   end
   
     (1..LB_SERVER_COUNT).each do |i|
-      config.vm.define LB_SERVER_NAME + "#{i}" do |subconfig|
-        subconfig.vm.box = LB_SERVER_OS
-        subconfig.vm.hostname = LB_SERVER_NAME + "#{i}"
-        subconfig.vm.network :private_network, ip: NETSUB + "#{i + 10}"
-        subconfig.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
-        subconfig.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
-        subconfig.vm.provision "file", source: "./config", destination: "/home/vagrant/.ssh/config"
-        subconfig.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
-        subconfig.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
-        subconfig.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
-        #subconfig.vm.network :forwarded_port, guest: 80, host: 8080
-        #subconfig.vm.network :forwarded_port, guest: 443, host: 4343
-        subconfig.vm.provider "virtualbox" do |lb|
-          lb.cpus = LB_SERVER_CPU
-          lb.memory = LB_SERVER_MEMORY
+      config.vm.define LB_SERVER_NAME + "#{i}" do |lb|
+      lb.vm.box = LB_SERVER_OS
+      lb.vm.hostname = LB_SERVER_NAME + "#{i}"
+      lb.vm.network :private_network, ip: NETSUB + "#{i + 10}"
+      lb.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
+      lb.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
+      lb.vm.provision "file", source: "./config", destination: "/home/vagrant/.ssh/config"
+      lb.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
+      lb.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
+      lb.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
+        #lb.vm.network :forwarded_port, guest: 80, host: 8080
+        #lb.vm.network :forwarded_port, guest: 443, host: 4343
+        lb.vm.provider "virtualbox" do |virtualbox|
+          virtualbox.cpus = LB_SERVER_CPU
+          virtualbox.memory = LB_SERVER_MEMORY
         end
       end
     end
     (1..WEB_SERVER_COUNT).each do |i|
-      config.vm.define WEB_SERVER_NAME + "#{i}" do |subconfig|
-        subconfig.vm.box = WEB_SERVER_OS
-        subconfig.vm.hostname = WEB_SERVER_NAME + "#{i}"
-        subconfig.vm.network :private_network, ip: NETSUB + "#{i + 20}"
-        subconfig.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
-        subconfig.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
-        subconfig.vm.provision "file", source: "./config", destination: "/home/vagrant/.ssh/config"
-        subconfig.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
-        subconfig.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
-        subconfig.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
-        #subconfig.vm.network :forwarded_port, guest: 80, host: 8080
-        #subconfig.vm.network :forwarded_port, guest: 443, host: 4343
-        subconfig.vm.provider "virtualbox" do |web|
-          web.cpus = WEB_SERVER_CPU
-          web.memory = WEB_SERVER_MEMORY
+      config.vm.define WEB_SERVER_NAME + "#{i}" do |web|
+      web.vm.box = WEB_SERVER_OS
+      web.vm.hostname = WEB_SERVER_NAME + "#{i}"
+      web.vm.network :private_network, ip: NETSUB + "#{i + 20}"
+      web.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
+      web.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
+      web.vm.provision "file", source: "./config", destination: "/home/vagrant/.ssh/config"
+      web.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
+      web.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
+      web.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
+        #web.vm.network :forwarded_port, guest: 80, host: 8080
+        #web.vm.network :forwarded_port, guest: 443, host: 4343
+        web.vm.provider "virtualbox" do |virtualbox|
+          virtualbox.cpus = WEB_SERVER_CPU
+          virtualbox.memory = WEB_SERVER_MEMORY
         end
       end
     end
     (1..APP_SERVER_COUNT).each do |i|
-      config.vm.define APP_SERVER_NAME + "#{i}" do |subconfig|
-        subconfig.vm.box = APP_SERVER_OS
-        subconfig.vm.hostname = APP_SERVER_NAME + "#{i}"
-        subconfig.vm.network :private_network, ip: NETSUB + "#{i + 30}"
-        subconfig.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
-        subconfig.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
-        subconfig.vm.provision "file", source: "./config", destination: "/home/vagrant/.ssh/config"
-        subconfig.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
-        subconfig.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
-        subconfig.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
-        #subconfig.vm.network :forwarded_port, guest: 80, host: 8080
-        #subconfig.vm.network :forwarded_port, guest: 443, host: 4343
-        subconfig.vm.provider "virtualbox" do |app|
-          app.cpus = APP_SERVER_CPU
-          app.memory = APP_SERVER_MEMORY
+      config.vm.define APP_SERVER_NAME + "#{i}" do |app|
+      app.vm.box = APP_SERVER_OS
+      app.vm.hostname = APP_SERVER_NAME + "#{i}"
+      app.vm.network :private_network, ip: NETSUB + "#{i + 30}"
+      app.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
+      app.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
+      app.vm.provision "file", source: "./config", destination: "/home/vagrant/.ssh/config"
+      app.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
+      app.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
+      app.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
+        #app.vm.network :forwarded_port, guest: 80, host: 8080
+        #app.vm.network :forwarded_port, guest: 443, host: 4343
+        app.vm.provider "virtualbox" do |virtualbox|
+          virtualbox.cpus = APP_SERVER_CPU
+          virtualbox.memory = APP_SERVER_MEMORY
         end
       end
     end
     (1..DB_SERVER_COUNT).each do |i|
-      config.vm.define DB_SERVER_NAME + "#{i}" do |subconfig|
-        subconfig.vm.box = DB_SERVER_OS
-        subconfig.vm.hostname = DB_SERVER_NAME + "#{i}"
-        subconfig.vm.network :private_network, ip: NETSUB + "#{i + 40}"
-        subconfig.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
-        subconfig.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
-        subconfig.vm.provision "file", source: "./config", destination: "/home/vagrant/.ssh/config"
-        subconfig.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
-        subconfig.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
-        subconfig.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
-        #subconfig.vm.network :forwarded_port, guest: 80, host: 8080
-        #subconfig.vm.network :forwarded_port, guest: 443, host: 4343
-        subconfig.vm.provider "virtualbox" do |db|
-          db.cpus = DB_SERVER_CPU
-          db.memory = DB_SERVER_MEMORY
+      config.vm.define DB_SERVER_NAME + "#{i}" do |db|
+      db.vm.box = DB_SERVER_OS
+      db.vm.hostname = DB_SERVER_NAME + "#{i}"
+      db.vm.network :private_network, ip: NETSUB + "#{i + 40}"
+      db.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
+      db.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
+      db.vm.provision "file", source: "./config", destination: "/home/vagrant/.ssh/config"
+      db.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
+      db.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
+      db.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
+        #db.vm.network :forwarded_port, guest: 80, host: 8080
+        #db.vm.network :forwarded_port, guest: 443, host: 4343
+        db.vm.provider "virtualbox" do |virtualbox|
+          virtualbox.cpus = DB_SERVER_CPU
+          virtualbox.memory = DB_SERVER_MEMORY
         end
       end
     end
