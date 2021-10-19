@@ -3,7 +3,8 @@
 **/.ssh/*_id_*
 **/.ssh/known_hosts
 **/tmp
-
+id_*
+*_id_*
 ### Vagrant ###
 # General
 .vagrant/
