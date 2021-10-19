@@ -116,9 +116,11 @@ Vagrant.configure("2") do |config|
     master.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
     master.vm.provision "shell", inline: "eval $(ssh-agent)"
     master.vm.provision "shell", inline: "ssh-add /home/vagrant/.ssh/id_rsa_vagrant"
-    master.vm.provider "virtualbox" do |virtualbox|
-      virtualbox.cpus = MASTER_SERVER_CPU
-      virtualbox.memory = MASTER_SERVER_MEMORY
+    #master.vm.provision "shell", path: "scripts/scripts1.sh"
+    #master.vm.provision "shell", path: "scripts/scripts2.sh"
+    master.vm.provider "virtualbox" do |vb|
+      vb.cpus = MASTER_SERVER_CPU
+      vb.memory = MASTER_SERVER_MEMORY
     end
   end
   
@@ -133,11 +135,13 @@ Vagrant.configure("2") do |config|
       lb.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
       lb.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
       lb.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
-        #lb.vm.network :forwarded_port, guest: 80, host: 8080
-        #lb.vm.network :forwarded_port, guest: 443, host: 4343
-        lb.vm.provider "virtualbox" do |virtualbox|
-          virtualbox.cpus = LB_SERVER_CPU
-          virtualbox.memory = LB_SERVER_MEMORY
+      #lb.vm.provision "shell", path: "scripts/scripts1.sh"
+      #lb.vm.provision "shell", path: "scripts/scripts2.sh"
+      #lb.vm.network :forwarded_port, guest: 80, host: 8080
+      #lb.vm.network :forwarded_port, guest: 443, host: 4343
+        lb.vm.provider "virtualbox" do |vb|
+          vb.cpus = LB_SERVER_CPU
+          vb.memory = LB_SERVER_MEMORY
         end
       end
     end
@@ -154,9 +158,9 @@ Vagrant.configure("2") do |config|
       web.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
         #web.vm.network :forwarded_port, guest: 80, host: 8080
         #web.vm.network :forwarded_port, guest: 443, host: 4343
-        web.vm.provider "virtualbox" do |virtualbox|
-          virtualbox.cpus = WEB_SERVER_CPU
-          virtualbox.memory = WEB_SERVER_MEMORY
+        web.vm.provider "virtualbox" do |vb|
+          vb.cpus = WEB_SERVER_CPU
+          vb.memory = WEB_SERVER_MEMORY
         end
       end
     end
@@ -171,11 +175,13 @@ Vagrant.configure("2") do |config|
       app.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
       app.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
       app.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
-        #app.vm.network :forwarded_port, guest: 80, host: 8080
-        #app.vm.network :forwarded_port, guest: 443, host: 4343
-        app.vm.provider "virtualbox" do |virtualbox|
-          virtualbox.cpus = APP_SERVER_CPU
-          virtualbox.memory = APP_SERVER_MEMORY
+      #app.vm.provision "shell", path: "scripts/scripts1.sh"
+      #app.vm.provision "shell", path: "scripts/scripts2.sh"
+      #app.vm.network :forwarded_port, guest: 80, host: 8080
+      #app.vm.network :forwarded_port, guest: 443, host: 4343
+        app.vm.provider "virtualbox" do |vb|
+          vb.cpus = APP_SERVER_CPU
+          vb.memory = APP_SERVER_MEMORY
         end
       end
     end
@@ -190,11 +196,13 @@ Vagrant.configure("2") do |config|
       db.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
       db.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
       db.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
-        #db.vm.network :forwarded_port, guest: 80, host: 8080
-        #db.vm.network :forwarded_port, guest: 443, host: 4343
-        db.vm.provider "virtualbox" do |virtualbox|
-          virtualbox.cpus = DB_SERVER_CPU
-          virtualbox.memory = DB_SERVER_MEMORY
+      #db.vm.provision "shell", path: "scripts/scripts1.sh"
+      #db.vm.provision "shell", path: "scripts/scripts2.sh"
+      #db.vm.network :forwarded_port, guest: 80, host: 8080
+      #db.vm.network :forwarded_port, guest: 443, host: 4343
+        db.vm.provider "virtualbox" do |vb|
+          vb.cpus = DB_SERVER_CPU
+          vb.memory = DB_SERVER_MEMORY
         end
       end
     end
