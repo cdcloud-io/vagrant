@@ -36,10 +36,6 @@ eval `ssh-agent -s`
 # Global Definitions
 CENTOS7 = "centos/7"
 CENTOS8 = "centos/8"
-UBUNTU14 = "ubuntu/trusty64"
-UBUNTU16 = "ubuntu/xenial64"
-UBUNTU18 = "ubuntu/bionic64"
-UBUNTU20 = "ubuntu/focal64"
 NETSUB = "10.7.100."
 MASTERIP = NETSUB + "5"
 
