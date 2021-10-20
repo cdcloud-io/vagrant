@@ -1,32 +1,38 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-
-# Author: stephen-ka
-# Company: n0cloudlabs
+=begin
+Author: stephen-ka
+Company: n0cloudlabs
 
 # Getting Started:
-# 1. vagrant plugin install vagrant-hostmanager
-# 2. Generate SSH Keys - ssh-keygen -t rsa -N "" -f $(pwd)/id_rsa_vagrant
-# 3. vagrant up
-# 4. vagrant ssh  //Will connect you to MASTER or use vagrant ssh <servername>
-# 5. Once connected to the master, you can ssh into any lab server using keys (without a password) with command: ssh vagrant@<serverhostname>
-# 6. vagrant halt //Stops the lab and powers off VMs - Keeps all data
-# 7. vagrant destroy -f ////Stops the lab and powers off VMs and DELETES ALL VMs - LOOSE ALL DATA
-# Additional boxes can be added from https://app.vagrantup.com/boxes/search
-#############################################################################################################################################
-#
-# Future Items
-# 1. Move script to external file, add package manager conditionals.
-# 2. Import gpg keys as part of scripts.
-# 3. Port forwards all rem'd out due to conflict.  can only forward on one guest.
-# 4. Add shared disk for clusters.
-# 5. Fix bash profile for remote terminal functionality - run command from terminal manually
-#
-#   eval `ssh-agent -s`
-#   ssh-add
-#
-#
+1. Install Vagrant plugins
+`vagrant plugin install vagrant-hostmanager`
+`vagrant plugin install vagrant-vbguest`
+2. Generate SSH Keys for local env
+`ssh-keygen -t rsa -N "" -f $(pwd)/id_rsa_vagrant`
+3. Bring up the env
+`vagrant up`
+4. Connect to MASTER or use v`agrant ssh <servername>`
+`vagrant ssh`
+5. Once connected to the master, you can ssh into any lab server using keys (without a password) with command: `ssh vagrant@<serverhostname>`
+6.HALTs the lab and powers off VMs - retains environment
+`vagrant halt`
+7. HALT and DELETE ALL VMs - LOOSE ALL DATA
+`vagrant destroy -f` 
 
+### Additional boxes can be added from https://app.vagrantup.com/boxes/search
+
+
+ #### Future Items
+1. Move script to external file, add package manager conditionals.
+2. Import gpg keys as part of scripts.
+3. Port forwards all rem'd out due to conflict.  can only forward on one guest.
+4. Add shared disk for clusters.
+5. Fix bash profile for remote terminal functionality - run command from terminal manually
+### Fix terminsl session 
+eval `ssh-agent -s`
+`ssh-add`
+=end
 # Global Definitions
 CENTOS7 = "centos/7"
 CENTOS8 = "centos/8"
@@ -45,7 +51,7 @@ MASTER_SERVER_NAME = "master"
 MASTER_SERVER_ADDDISKSIZE = "2GB"
 
 # LOAD BALANCER Server Definitions - 0 by default for no deployment
-LB_SERVER_COUNT = 1
+LB_SERVER_COUNT = 0
 LB_SERVER_CPU = 1
 LB_SERVER_MEMORY = 1024
 LB_SERVER_OS = CENTOS7
@@ -100,7 +106,7 @@ Vagrant.configure("2") do |config|
   config.ssh.forward_agent = true
 
   # Install POSTS SCRIPTS on ALL Machines 
-  # config.vm.provision "shell", inline: $POST_SCRIPT_YUM
+  config.vm.provision "shell", inline: $POST_SCRIPT_YUM
 
 
   config.vm.define MASTER_SERVER_NAME + "1", primary: true do |master|
