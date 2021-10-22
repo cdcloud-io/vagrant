@@ -33,6 +33,7 @@ Company: n0cloudlabs
 eval `ssh-agent -s`
 `ssh-add`
 =end
+
 # Global Definitions
 CENTOS7 = "centos/7"
 NETSUB = "10.7.100."
@@ -42,51 +43,21 @@ MASTERIP = NETSUB + "5"
 MASTER_SERVER_CPU = 1
 MASTER_SERVER_MEMORY = 1024
 MASTER_SERVER_OS = CENTOS7
-MASTER_SERVER_NAME = "workstation"
-# MASTER_SERVER_ADDDISKSIZE = "2GB"
-
-# LOAD BALANCER Server Definitions - 0 by default for no deployment
-LB_SERVER_COUNT = 0
-LB_SERVER_CPU = 1
-LB_SERVER_MEMORY = 512
-LB_SERVER_OS = CENTOS7
-LB_SERVER_NAME = "lb" # This name will be suffixed with a count number
-
-# WEB Server Definitions - 0 by default for no deployment
-WEB_SERVER_COUNT = 0
-WEB_SERVER_CPU = 1
-WEB_SERVER_MEMORY = 512
-WEB_SERVER_OS = CENTOS7
-WEB_SERVER_NAME = "web" # This name will be suffixed with a count number
+MASTER_SERVER_NAME = "chef-infra-workstation"
 
 # APP Server Definitions - 0 by default for no deployment
-APP_SERVER_COUNT = 1
+APP_SERVER_COUNT = 0
 APP_SERVER_CPU = 1
-APP_SERVER_MEMORY = 512
+APP_SERVER_MEMORY = 1024
 APP_SERVER_OS = CENTOS7
-APP_SERVER_NAME = "app" # This name will be suffixed with a count number
-
-# DATABASE Server Definitions - 0 by default for no deployment
-DB_SERVER_COUNT = 0
-DB_SERVER_CPU = 1
-DB_SERVER_MEMORY = 512
-DB_SERVER_OS = CENTOS7
-DB_SERVER_NAME = "db" # This name will be suffixed with a count number
+APP_SERVER_NAME = "chef-infra-server" # This name will be suffixed with a count number
 
 # Node Server Definitions - 0 by default for no deployment
-NODE_SERVER_COUNT = 2
+NODE_SERVER_COUNT = 0
 NODE_SERVER_CPU = 1
 NODE_SERVER_MEMORY = 512
 NODE_SERVER_OS = CENTOS7
-NODE_SERVER_NAME = "node" # This name will be suffixed with a count number
-
-
-$POST_SCRIPT_YUM = <<-SCRIPT
-yum upgrade -y
-yum install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -y
-yum install gcc kernel-devel kernel-headers dkms make bzip2 perl wget curl vim -y
-echo "complete" >> /home/vagrant/postscript.txt
-SCRIPT
+NODE_SERVER_NAME = "chef-client-node" # This name will be suffixed with a count number
 
 Vagrant.configure("2") do |config|
   config.hostmanager.enabled = true
@@ -109,56 +80,14 @@ Vagrant.configure("2") do |config|
     master.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
     master.vm.provision "shell", inline: "eval $(ssh-agent)"
     master.vm.provision "shell", inline: "ssh-add /home/vagrant/.ssh/id_rsa_vagrant"
-    #master.vm.provision "shell", path: "scripts/scripts1.sh"
-    #master.vm.provision "shell", path: "scripts/scripts2.sh"
+    master.vm.provision "shell", path: "scripts/common.sh"
+    master.vm.provision "shell", path: "scripts/chefworkstation.sh"
     master.vm.provider "virtualbox" do |vb|
       vb.cpus = MASTER_SERVER_CPU
       vb.memory = MASTER_SERVER_MEMORY
     end
   end
   
-    (1..LB_SERVER_COUNT).each do |i|
-      config.vm.define LB_SERVER_NAME + "#{i}" do |lb|
-      lb.vm.box = LB_SERVER_OS
-      lb.vm.hostname = LB_SERVER_NAME + "#{i}"
-      lb.vm.network :private_network, ip: NETSUB + "#{i + 10}"
-      lb.vbguest.installer_options = { allow_kernel_upgrade: true }
-      lb.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
-      lb.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
-      lb.vm.provision "file", source: "./scripts/config", destination: "/home/vagrant/.ssh/config"
-      lb.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
-      lb.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
-      lb.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
-      #lb.vm.provision "shell", path: "scripts/scripts1.sh"
-      #lb.vm.provision "shell", path: "scripts/scripts2.sh"
-      #lb.vm.network :forwarded_port, guest: 80, host: 8080
-      #lb.vm.network :forwarded_port, guest: 443, host: 4343
-        lb.vm.provider "virtualbox" do |vb|
-          vb.cpus = LB_SERVER_CPU
-          vb.memory = LB_SERVER_MEMORY
-        end
-      end
-    end
-    (1..WEB_SERVER_COUNT).each do |i|
-      config.vm.define WEB_SERVER_NAME + "#{i}" do |web|
-      web.vm.box = WEB_SERVER_OS
-      web.vm.hostname = WEB_SERVER_NAME + "#{i}"
-      web.vm.network :private_network, ip: NETSUB + "#{i + 20}"
-      web.vbguest.installer_options = { allow_kernel_upgrade: true }
-      web.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
-      web.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
-      web.vm.provision "file", source: "./scripts/config", destination: "/home/vagrant/.ssh/config"
-      web.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
-      web.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
-      web.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
-        #web.vm.network :forwarded_port, guest: 80, host: 8080
-        #web.vm.network :forwarded_port, guest: 443, host: 4343
-        web.vm.provider "virtualbox" do |vb|
-          vb.cpus = WEB_SERVER_CPU
-          vb.memory = WEB_SERVER_MEMORY
-        end
-      end
-    end
     (1..APP_SERVER_COUNT).each do |i|
       config.vm.define APP_SERVER_NAME + "#{i}" do |app|
       app.vm.box = APP_SERVER_OS
@@ -181,32 +110,11 @@ Vagrant.configure("2") do |config|
         end
       end
     end
-    (1..DB_SERVER_COUNT).each do |i|
-      config.vm.define DB_SERVER_NAME + "#{i}" do |db|
-      db.vm.box = DB_SERVER_OS
-      db.vm.hostname = DB_SERVER_NAME + "#{i}"
-      db.vm.network :private_network, ip: NETSUB + "#{i + 40}"
-      db.vbguest.installer_options = { allow_kernel_upgrade: true }
-      db.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
-      db.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
-      db.vm.provision "file", source: "./scripts/config", destination: "/home/vagrant/.ssh/config"
-      db.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
-      db.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
-      db.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
-      #db.vm.provision "shell", path: "scripts/scripts1.sh"
-      #db.vm.provision "shell", path: "scripts/scripts2.sh"
-      #db.vm.network :forwarded_port, guest: 80, host: 8080
-      #db.vm.network :forwarded_port, guest: 443, host: 4343
-        db.vm.provider "virtualbox" do |vb|
-          vb.cpus = DB_SERVER_CPU
-          vb.memory = DB_SERVER_MEMORY
-        end
-      end
-    end
+    
     (1..NODE_SERVER_COUNT).each do |i|
       config.vm.define NODE_SERVER_NAME + "#{i}" do |node|
-      node.vm.box = DB_SERVER_OS
-      node.vm.hostname = DB_SERVER_NAME + "#{i}"
+      node.vm.box = NODE_SERVER_OS
+      node.vm.hostname = NODE_SERVER_NAME + "#{i}"
       node.vm.network :private_network, ip: NETSUB + "#{i + 50}"
       node.vbguest.installer_options = { allow_kernel_upgrade: true }
       node.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
