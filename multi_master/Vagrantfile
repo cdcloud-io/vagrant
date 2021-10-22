@@ -136,6 +136,7 @@ Vagrant.configure("2") do |config|
       lb.vm.box = LB_SERVER_OS
       lb.vm.hostname = LB_SERVER_NAME + "#{i}"
       lb.vm.network :private_network, ip: NETSUB + "#{i + 10}"
+      lb.vbguest.installer_options = { allow_kernel_upgrade: true }
       lb.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
       lb.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
       lb.vm.provision "file", source: "./scripts/config", destination: "/home/vagrant/.ssh/config"
@@ -157,6 +158,7 @@ Vagrant.configure("2") do |config|
       web.vm.box = WEB_SERVER_OS
       web.vm.hostname = WEB_SERVER_NAME + "#{i}"
       web.vm.network :private_network, ip: NETSUB + "#{i + 20}"
+      web.vbguest.installer_options = { allow_kernel_upgrade: true }
       web.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
       web.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
       web.vm.provision "file", source: "./scripts/config", destination: "/home/vagrant/.ssh/config"
@@ -176,6 +178,7 @@ Vagrant.configure("2") do |config|
       app.vm.box = APP_SERVER_OS
       app.vm.hostname = APP_SERVER_NAME + "#{i}"
       app.vm.network :private_network, ip: NETSUB + "#{i + 30}"
+      app.vbguest.installer_options = { allow_kernel_upgrade: true }
       app.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
       app.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
       app.vm.provision "file", source: "./scripts/config", destination: "/home/vagrant/.ssh/config"
@@ -197,6 +200,7 @@ Vagrant.configure("2") do |config|
       db.vm.box = DB_SERVER_OS
       db.vm.hostname = DB_SERVER_NAME + "#{i}"
       db.vm.network :private_network, ip: NETSUB + "#{i + 40}"
+      db.vbguest.installer_options = { allow_kernel_upgrade: true }
       db.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
       db.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
       db.vm.provision "file", source: "./scripts/config", destination: "/home/vagrant/.ssh/config"

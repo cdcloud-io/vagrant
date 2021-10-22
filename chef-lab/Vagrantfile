@@ -35,7 +35,6 @@ eval `ssh-agent -s`
 =end
 # Global Definitions
 CENTOS7 = "centos/7"
-CENTOS8 = "centos/8"
 NETSUB = "10.7.100."
 MASTERIP = NETSUB + "5"
 
@@ -43,8 +42,8 @@ MASTERIP = NETSUB + "5"
 MASTER_SERVER_CPU = 1
 MASTER_SERVER_MEMORY = 1024
 MASTER_SERVER_OS = CENTOS7
-MASTER_SERVER_NAME = "master"
-#MASTER_SERVER_ADDDISKSIZE = "2GB"
+MASTER_SERVER_NAME = "workstation"
+# MASTER_SERVER_ADDDISKSIZE = "2GB"
 
 # LOAD BALANCER Server Definitions - 0 by default for no deployment
 LB_SERVER_COUNT = 0
@@ -61,7 +60,7 @@ WEB_SERVER_OS = CENTOS7
 WEB_SERVER_NAME = "web" # This name will be suffixed with a count number
 
 # APP Server Definitions - 0 by default for no deployment
-APP_SERVER_COUNT = 2
+APP_SERVER_COUNT = 1
 APP_SERVER_CPU = 1
 APP_SERVER_MEMORY = 512
 APP_SERVER_OS = CENTOS7
@@ -74,26 +73,18 @@ DB_SERVER_MEMORY = 512
 DB_SERVER_OS = CENTOS7
 DB_SERVER_NAME = "db" # This name will be suffixed with a count number
 
-# Scripts
+# Node Server Definitions - 0 by default for no deployment
+NODE_SERVER_COUNT = 2
+NODE_SERVER_CPU = 1
+NODE_SERVER_MEMORY = 512
+NODE_SERVER_OS = CENTOS7
+NODE_SERVER_NAME = "node" # This name will be suffixed with a count number
 
-# FUTURE USE
-$SSHOWN = <<-SCRIPT
-chown -R vagrant:vagrant /home/vagrant/.ssh/
-SCRIPT
 
-# FUTURE USE
-# https://docs.fedoraproject.org/en-US/epel/
 $POST_SCRIPT_YUM = <<-SCRIPT
 yum upgrade -y
 yum install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -y
 yum install gcc kernel-devel kernel-headers dkms make bzip2 perl wget curl vim -y
-echo "complete" >> /home/vagrant/postscript.txt
-SCRIPT
-
-# FUTURE USE
-$POST_SCRIPT_APT = <<-SCRIPT
-apt-get update
-apt-get upgrade -y
 echo "complete" >> /home/vagrant/postscript.txt
 SCRIPT
 
@@ -102,14 +93,13 @@ Vagrant.configure("2") do |config|
   config.ssh.forward_agent = true
 
   # Install POSTS SCRIPTS on ALL Machines 
-  config.vm.provision "shell", inline: $POST_SCRIPT_YUM
+  #config.vm.provision "shell", inline: $POST_SCRIPT_YUM
 
 
   config.vm.define MASTER_SERVER_NAME + "1", primary: true do |master|
     master.vm.box = CENTOS7
     master.vm.hostname = MASTER_SERVER_NAME + "1"
     master.vm.network :private_network, ip: MASTERIP
-    master.vm.disk :disk, size: MASTER_SERVER_ADDDISKSIZE, name: "storage"
     master.vbguest.installer_options = { allow_kernel_upgrade: true }
     master.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
     master.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
@@ -132,6 +122,7 @@ Vagrant.configure("2") do |config|
       lb.vm.box = LB_SERVER_OS
       lb.vm.hostname = LB_SERVER_NAME + "#{i}"
       lb.vm.network :private_network, ip: NETSUB + "#{i + 10}"
+      lb.vbguest.installer_options = { allow_kernel_upgrade: true }
       lb.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
       lb.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
       lb.vm.provision "file", source: "./scripts/config", destination: "/home/vagrant/.ssh/config"
@@ -153,6 +144,7 @@ Vagrant.configure("2") do |config|
       web.vm.box = WEB_SERVER_OS
       web.vm.hostname = WEB_SERVER_NAME + "#{i}"
       web.vm.network :private_network, ip: NETSUB + "#{i + 20}"
+      web.vbguest.installer_options = { allow_kernel_upgrade: true }
       web.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
       web.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
       web.vm.provision "file", source: "./scripts/config", destination: "/home/vagrant/.ssh/config"
@@ -172,6 +164,7 @@ Vagrant.configure("2") do |config|
       app.vm.box = APP_SERVER_OS
       app.vm.hostname = APP_SERVER_NAME + "#{i}"
       app.vm.network :private_network, ip: NETSUB + "#{i + 30}"
+      app.vbguest.installer_options = { allow_kernel_upgrade: true }
       app.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
       app.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
       app.vm.provision "file", source: "./scripts/config", destination: "/home/vagrant/.ssh/config"
@@ -193,6 +186,7 @@ Vagrant.configure("2") do |config|
       db.vm.box = DB_SERVER_OS
       db.vm.hostname = DB_SERVER_NAME + "#{i}"
       db.vm.network :private_network, ip: NETSUB + "#{i + 40}"
+      db.vbguest.installer_options = { allow_kernel_upgrade: true }
       db.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
       db.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
       db.vm.provision "file", source: "./scripts/config", destination: "/home/vagrant/.ssh/config"
@@ -206,6 +200,28 @@ Vagrant.configure("2") do |config|
         db.vm.provider "virtualbox" do |vb|
           vb.cpus = DB_SERVER_CPU
           vb.memory = DB_SERVER_MEMORY
+        end
+      end
+    end
+    (1..NODE_SERVER_COUNT).each do |i|
+      config.vm.define NODE_SERVER_NAME + "#{i}" do |node|
+      node.vm.box = DB_SERVER_OS
+      node.vm.hostname = DB_SERVER_NAME + "#{i}"
+      node.vm.network :private_network, ip: NETSUB + "#{i + 50}"
+      node.vbguest.installer_options = { allow_kernel_upgrade: true }
+      node.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
+      node.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
+      node.vm.provision "file", source: "./scripts/config", destination: "/home/vagrant/.ssh/config"
+      node.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
+      node.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
+      node.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
+      #node.vm.provision "shell", path: "scripts/scripts1.sh"
+      #node.vm.provision "shell", path: "scripts/scripts2.sh"
+      #node.vm.network :forwarded_port, guest: 80, host: 8080
+      #node.vm.network :forwarded_port, guest: 443, host: 4343
+        node.vm.provider "virtualbox" do |vb|
+          vb.cpus = NODE_SERVER_CPU
+          vb.memory = NODE_SERVER_MEMORY
         end
       end
     end
