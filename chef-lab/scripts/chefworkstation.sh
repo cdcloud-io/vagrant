@@ -3,3 +3,5 @@ wget https://packages.chef.io/files/stable/chef-workstation/21.10.640/el/8/chef-
 sudo yum localinstall /tmp/chef-workstation-21.10.640-1.el8.x86_64.rpm -y
 echo eval $(chef -v)
 echo "complete chef workstation install" >> /home/vagrant/postscript.txt
+echo 'export PATH="/opt/chef-workstation/embedded/bin:$PATH"' >> /home/vagrant/.bashrc
+echo 'eval "$(chef shell-init bash)"' >> /home/vagrant/.bashrc
