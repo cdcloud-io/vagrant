@@ -106,7 +106,7 @@ Vagrant.configure("2") do |config|
   config.ssh.forward_agent = true
 
   # Install POSTS SCRIPTS on ALL Machines 
-  config.vm.provision "shell", inline: $POST_SCRIPT_YUM
+  #config.vm.provision "shell", inline: $POST_SCRIPT_YUM, privileged: true #runas root
 
 
   config.vm.define MASTER_SERVER_NAME + "1", primary: true do |master|
@@ -123,8 +123,8 @@ Vagrant.configure("2") do |config|
     master.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
     master.vm.provision "shell", inline: "eval $(ssh-agent)"
     master.vm.provision "shell", inline: "ssh-add /home/vagrant/.ssh/id_rsa_vagrant"
-    #master.vm.provision "shell", path: "scripts/scripts1.sh"
-    #master.vm.provision "shell", path: "scripts/scripts2.sh"
+    #master.vm.provision "shell", path: "scripts/scripts1.sh", privileged: true #runas root
+    #master.vm.provision "shell", path: "scripts/scripts2.sh", privileged: false #runas vagrant
     master.vm.provider "virtualbox" do |vb|
       vb.cpus = MASTER_SERVER_CPU
       vb.memory = MASTER_SERVER_MEMORY
