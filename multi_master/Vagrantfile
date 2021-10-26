@@ -44,7 +44,7 @@ NETSUB = "10.7.100."
 MASTERIP = NETSUB + "5"
 
 # MASTER or BASTION Server Definitions (Also Primary Server for vagrant shh)
-MASTER_SERVER_CPU = 1
+MASTER_SERVER_CPU = 1 # Leave at 1
 MASTER_SERVER_MEMORY = 1024
 MASTER_SERVER_OS = CENTOS7
 MASTER_SERVER_NAME = "master"

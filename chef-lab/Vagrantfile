@@ -40,24 +40,24 @@ NETSUB = "10.7.100."
 MASTERIP = NETSUB + "5"
 
 # MASTER or BASTION Server Definitions (Also Primary Server for vagrant shh)
-MASTER_SERVER_CPU = 1
+MASTER_SERVER_CPU = 1 # Leave at 1
 MASTER_SERVER_MEMORY = 1024
 MASTER_SERVER_OS = CENTOS7
-MASTER_SERVER_NAME = "chef-infra-workstation"
+MASTER_SERVER_NAME = "chefworkstation"
 
 # APP Server Definitions - 0 by default for no deployment
 APP_SERVER_COUNT = 1
 APP_SERVER_CPU = 1
-APP_SERVER_MEMORY = 1024
+APP_SERVER_MEMORY = 4096
 APP_SERVER_OS = CENTOS7
-APP_SERVER_NAME = "chef-infra-server" # This name will be suffixed with a count number
+APP_SERVER_NAME = "chefserver" # This name will be suffixed with a count number
 
 # Node Server Definitions - 0 by default for no deployment
 NODE_SERVER_COUNT = 0
 NODE_SERVER_CPU = 1
 NODE_SERVER_MEMORY = 512
 NODE_SERVER_OS = CENTOS7
-NODE_SERVER_NAME = "chef-client-node" # This name will be suffixed with a count number
+NODE_SERVER_NAME = "chefnode" # This name will be suffixed with a count number
 
 Vagrant.configure("2") do |config|
   config.hostmanager.enabled = true
@@ -81,8 +81,8 @@ Vagrant.configure("2") do |config|
     master.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
     master.vm.provision "shell", inline: "eval $(ssh-agent)"
     master.vm.provision "shell", inline: "ssh-add /home/vagrant/.ssh/id_rsa_vagrant"
-    master.vm.provision "shell", path: "scripts/common.sh" ,privileged: true
-    master.vm.provision "shell", path: "scripts/chefinfraworkstation.sh", privileged: false
+    #master.vm.provision "shell", path: "scripts/common.sh", privileged: true
+    #master.vm.provision "shell", path: "scripts/chefinfraworkstation.sh", privileged: false
     master.vm.provider "virtualbox" do |vb|
       vb.cpus = MASTER_SERVER_CPU
       vb.memory = MASTER_SERVER_MEMORY
@@ -101,8 +101,8 @@ Vagrant.configure("2") do |config|
       app.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
       app.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
       app.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
-      master.vm.provision "shell", path: "scripts/common.sh" ,privileged: true
-      master.vm.provision "shell", path: "scripts/chefinfraworkstation.sh", privileged: false
+      app.vm.provision "shell", path: "scripts/common.sh", privileged: true
+      app.vm.provision "shell", path: "scripts/chefinfraserver.sh", privileged: false
       #app.vm.network :forwarded_port, guest: 80, host: 8080
       #app.vm.network :forwarded_port, guest: 443, host: 4343
         app.vm.provider "virtualbox" do |vb|
@@ -124,8 +124,8 @@ Vagrant.configure("2") do |config|
       node.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_rsa_vagrant.pub >> /home/vagrant/.ssh/authorized_keys"
       node.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh/"
       node.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
-      #node.vm.provision "shell", path: "scripts/scripts1.sh"
-      #node.vm.provision "shell", path: "scripts/scripts2.sh"
+      #node.vm.provision "shell", path: "scripts/scripts1.sh", privileged: true
+      #node.vm.provision "shell", path: "scripts/scripts2.sh", privileged: false
       #node.vm.network :forwarded_port, guest: 80, host: 8080
       #node.vm.network :forwarded_port, guest: 443, host: 4343
         node.vm.provider "virtualbox" do |vb|
