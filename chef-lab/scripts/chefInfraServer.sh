@@ -9,5 +9,5 @@ sudo chef-server-ctl user-create vagrant vagrant user1 vagrant@n0clouds.com 'P@s
 echo Creating cheg-org: vagrant_org
 sleep 3
 sudo chef-server-ctl org-create vagrantorg 'vagrant_org' --association_user vagrant --filename /home/vagrant/vagrant_org-validator.pem
-
-
+sudo chown vagrant:vagrant /home/vagrant/*.pem
+scp /home/vagrant/*.pem chefworkstation1:/home/vagrant/*
