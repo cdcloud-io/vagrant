@@ -105,9 +105,7 @@ Vagrant.configure("2") do |config|
       app.vm.provision "shell", path: "scripts/chefinfraserver.sh", privileged: false
       #app.vm.network :forwarded_port, guest: 80, host: 8080
       #app.vm.network :forwarded_port, guest: 443, host: 4343
-      app.trigger.after :up do |trigger|
-          
-        app.vm.provider "virtualbox" do |vb|
+       app.vm.provider "virtualbox" do |vb|
           vb.cpus = APP_SERVER_CPU
           vb.memory = APP_SERVER_MEMORY
         end
