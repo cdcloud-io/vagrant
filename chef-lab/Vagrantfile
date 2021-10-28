@@ -53,7 +53,7 @@ APP_SERVER_OS = CENTOS7
 APP_SERVER_NAME = "chefserver" # This name will be suffixed with a count number
 
 # Node Server Definitions - 0 by default for no deployment
-NODE_SERVER_COUNT = 0
+NODE_SERVER_COUNT = 3
 NODE_SERVER_CPU = 1
 NODE_SERVER_MEMORY = 512
 NODE_SERVER_OS = CENTOS7
@@ -72,7 +72,7 @@ Vagrant.configure("2") do |config|
     #master.vm.box = "ubuntu/focal64"
     master.vm.hostname = MASTER_SERVER_NAME + "1"
     master.vm.network :private_network, ip: MASTERIP
-    #master.vbguest.installer_options = { allow_kernel_upgrade: true }
+    master.vbguest.installer_options = { allow_kernel_upgrade: true }
     master.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
     master.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
     master.vm.provision "file", source: "./scripts/config", destination: "/home/vagrant/.ssh/config"
@@ -81,8 +81,8 @@ Vagrant.configure("2") do |config|
     master.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/config"
     master.vm.provision "shell", inline: "eval $(ssh-agent)"
     master.vm.provision "shell", inline: "ssh-add /home/vagrant/.ssh/id_rsa_vagrant"
-    #master.vm.provision "shell", path: "scripts/common.sh", privileged: true
-    #master.vm.provision "shell", path: "scripts/chefinfraworkstation.sh", privileged: false
+    master.vm.provision "shell", path: "scripts/common.sh", privileged: true
+    master.vm.provision "shell", path: "scripts/chefinfraworkstation.sh", privileged: false
     master.vm.provider "virtualbox" do |vb|
       vb.cpus = MASTER_SERVER_CPU
       vb.memory = MASTER_SERVER_MEMORY
@@ -94,7 +94,7 @@ Vagrant.configure("2") do |config|
       app.vm.box = APP_SERVER_OS
       app.vm.hostname = APP_SERVER_NAME + "#{i}"
       app.vm.network :private_network, ip: NETSUB + "#{i + 30}"
-      #app.vbguest.installer_options = { allow_kernel_upgrade: true }
+      app.vbguest.installer_options = { allow_kernel_upgrade: true }
       app.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
       app.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
       app.vm.provision "file", source: "./scripts/config", destination: "/home/vagrant/.ssh/config"
@@ -117,7 +117,7 @@ Vagrant.configure("2") do |config|
       node.vm.box = NODE_SERVER_OS
       node.vm.hostname = NODE_SERVER_NAME + "#{i}"
       node.vm.network :private_network, ip: NETSUB + "#{i + 50}"
-      #node.vbguest.installer_options = { allow_kernel_upgrade: true }
+      node.vbguest.installer_options = { allow_kernel_upgrade: true }
       node.vm.provision "file", source: "./id_rsa_vagrant", destination: "/home/vagrant/.ssh/id_rsa_vagrant"
       node.vm.provision "file", source: "./id_rsa_vagrant.pub", destination: "/home/vagrant/.ssh/id_rsa_vagrant.pub"
       node.vm.provision "file", source: "./scripts/config", destination: "/home/vagrant/.ssh/config"
