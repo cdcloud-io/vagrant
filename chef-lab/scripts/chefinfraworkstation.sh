@@ -5,4 +5,6 @@ echo eval $(chef -v)
 echo "complete chef workstation install" >> /home/vagrant/postscript.txt
 echo 'export PATH="/opt/chef-workstation/bin/:/opt/chef-workstation/embedded/bin:$PATH"' >> /home/vagrant/.bashrc
 echo 'eval "$(chef shell-init bash)"' >> /home/vagrant/.bashrc
+mkdir -p /home/vagrant/chef/.chef/trusted_certs
+cd ~/chef
 chef generate repo chef-repo --chef-license accept-silent

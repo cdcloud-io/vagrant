@@ -14,5 +14,8 @@ sudo chef-server-ctl org-delete vagrantorg -y
 sleep 1
 sudo chef-server-ctl org-create vagrantorg 'vagrant org' --association_user vagrant --filename /home/vagrant/vagrantorg-validator.pem
 sudo chown vagrant:vagrant /home/vagrant/*.pem
-scp /home/vagrant/*.pem chefworkstation1:/home/vagrant/
-
+scp /home/vagrant/*.pem chefworkstation1:/home/vagrant/chef/.chef
+#sudo su
+sudo cp /var/opt/opscode/nginx/ca/chefserver1.crt /home/vagrant/ && sudo chown vagrant:vagrant /home/vagrant/chefserver1.crt
+#exit
+scp /home/vagrant/*.crt chefworkstation1:/home/vagrant/chef/.chef/trusted_certs/
